@@ -31,7 +31,7 @@
 
   <groupId>cl.iplacex.automatizacion</groupId>
   <artifactId>gestor-tareas</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>Gestor de Tareas</name>
   <description>Aplicación bajo prueba para el examen final de Automatización de Pruebas</description>
 

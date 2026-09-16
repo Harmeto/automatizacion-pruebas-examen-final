@@ -14,7 +14,7 @@ RUN addgroup -S gestor && adduser -S gestor -G gestor
 
 WORKDIR /app
 
-ARG JAR_FILE=target/gestor-tareas-1.0.0.jar
+ARG JAR_FILE=target/gestor-tareas-1.0.1.jar
 COPY ${JAR_FILE} aplicacion.jar
 
 # Metadatos de auditoría: quedan grabados en la imagen y la aplicación los
