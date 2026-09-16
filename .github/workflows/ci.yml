@@ -37,10 +37,10 @@ jobs:
 
     steps:
       - name: Checkout del commit disparador
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Preparar JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
@@ -66,7 +66,7 @@ jobs:
 
       - name: Publicar resultados de las unitarias
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: reportes-unitarias
           path: |
@@ -75,7 +75,7 @@ jobs:
           retention-days: 7
 
       - name: Publicar el artefacto construido
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: aplicacion-jar
           path: target/gestor-tareas-*.jar
@@ -93,10 +93,10 @@ jobs:
 
     steps:
       - name: Checkout del commit disparador
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Preparar JDK ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
@@ -110,7 +110,7 @@ jobs:
 
       - name: Publicar resultados de integración
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: reportes-integracion
           path: target/failsafe-reports/
