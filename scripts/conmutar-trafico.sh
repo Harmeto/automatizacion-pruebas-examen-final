@@ -42,6 +42,15 @@ server {
 }
 CONF
 
+# La configuración se instala dentro del contenedor, sobre el volumen de
+# Docker. La copia del repositorio queda como registro versionado de cuál fue
+# el último estado aplicado, pero no es la que lee nginx.
+docker compose exec -T balanceador sh -c 'cat > /etc/nginx/conf.d/activo.conf' < "$ARCHIVO_ACTIVO"
+
+# La imagen trae un default.conf que también escucha en el puerto 80 y se
+# quedaría con las peticiones al ser el primer server block. Se retira.
+docker compose exec -T balanceador rm -f /etc/nginx/conf.d/default.conf
+
 # Recarga en caliente: nginx relee la configuración sin reiniciar el proceso.
 docker compose exec -T balanceador nginx -s reload 2>/dev/null
 
