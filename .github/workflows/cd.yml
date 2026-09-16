@@ -79,7 +79,7 @@ jobs:
         run: |
           echo "## Auditoría del despliegue" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          cat docs/evidencias/auditoria-despliegues.log >> "$GITHUB_STEP_SUMMARY" || true
+          cat deploy/auditoria.log >> "$GITHUB_STEP_SUMMARY" || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publicar evidencia
@@ -89,6 +89,7 @@ jobs:
           name: evidencia-despliegue
           path: |
             docs/evidencias/
+            deploy/auditoria.log
             target/cucumber-reports/
           retention-days: 7
 

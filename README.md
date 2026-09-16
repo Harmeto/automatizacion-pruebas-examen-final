@@ -370,7 +370,7 @@ Todo en [`docs/evidencias/`](docs/evidencias):
 | [`06-ci-github-actions.txt`](docs/evidencias/06-ci-github-actions.txt) | Detalle de la ejecución del pipeline de CI, con sus jobs y artefactos |
 | [`07-ci-ejecucion-exitosa.png`](docs/evidencias/07-ci-ejecucion-exitosa.png) | Las tres etapas del pipeline de CI en verde |
 | [`08-repositorio-ramas.png`](docs/evidencias/08-repositorio-ramas.png) | Ramas GitFlow publicadas en el repositorio |
-| [`auditoria-despliegues.log`](docs/evidencias/auditoria-despliegues.log) | Traza completa de despliegues, promociones y rollbacks |
+| [`auditoria-despliegues.log`](docs/evidencias/auditoria-despliegues.log) | Traza de las ejecuciones documentadas: despliegues, promociones y rollbacks |
 
 ### El pipeline de integración continua
 
