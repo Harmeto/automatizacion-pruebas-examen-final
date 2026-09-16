@@ -1,0 +1,17 @@
+# Traza de auditoria capturada durante las ejecuciones documentadas del
+# 2026-09-15. El registro en vivo lo escriben los scripts en
+# deploy/auditoria.log, que no esta versionado.
+#
+2026-09-16T02:09:41Z | DESPLIEGUE-INICIO  | version=1.1.0              | slot=green | commit=d687609  | rama=develop                      | iniciado
+2026-09-16T02:10:12Z | DESPLIEGUE-OK      | version=1.1.0              | slot=green | commit=d687609  | rama=develop                      | PROMOVIDO tras aprobar el gate
+2026-09-16T02:10:23Z | ROLLBACK           | version=1.0.0              | slot=blue  | commit=d687609  | rama=develop                      | COMPLETADO: se detectan errores en la version 1.1.0 tras la promocion
+2026-09-16T02:10:45Z | DESPLIEGUE-INICIO  | version=1.2.0              | slot=green | commit=acb259c  | rama=experimento/regresion-interfaz | iniciado
+2026-09-16T02:11:17Z | DESPLIEGUE-RECHAZADO | version=1.2.0              | slot=green | commit=acb259c  | rama=experimento/regresion-interfaz | RECHAZADO por el Acceptance Gate; trafico intacto en blue
+2026-09-16T02:16:35Z | DESPLIEGUE-INICIO  | version=1.1.0              | slot=green | commit=b9f4fdc  | rama=develop                      | iniciado
+2026-09-16T02:17:03Z | DESPLIEGUE-OK      | version=1.1.0              | slot=green | commit=b9f4fdc  | rama=develop                      | PROMOVIDO tras aprobar el gate
+2026-09-16T02:17:29Z | ROLLBACK           | version=1.0.0              | slot=blue  | commit=b9f4fdc  | rama=develop                      | COMPLETADO: captura de evidencia del estado previo
+2026-09-16T02:48:14Z | DESPLIEGUE-INICIO  | version=2.0.0              | slot=green | commit=4b08774  | rama=develop                      | iniciado
+2026-09-16T02:48:45Z | DESPLIEGUE-OK      | version=2.0.0              | slot=green | commit=4b08774  | rama=develop                      | PROMOVIDO tras aprobar el gate
+2026-09-16T02:48:56Z | ROLLBACK           | version=1.0.0              | slot=blue  | commit=4b08774  | rama=develop                      | COMPLETADO: verificacion de la guia
+2026-09-16T02:48:56Z | DESPLIEGUE-INICIO  | version=9.9.9-defectuosa   | slot=green | commit=4b08774  | rama=develop                      | iniciado
+2026-09-16T02:49:29Z | DESPLIEGUE-RECHAZADO | version=9.9.9-defectuosa   | slot=green | commit=4b08774  | rama=develop                      | RECHAZADO por el Acceptance Gate; trafico intacto en blue

@@ -36,7 +36,7 @@ public class PaginaTareas {
         this.urlBase = urlBase;
         // Esperas explícitas en lugar de pausas fijas: es la forma recomendada
         // de evitar pruebas intermitentes (flaky).
-        this.espera = new WebDriverWait(navegador, Duration.ofSeconds(10));
+        this.espera = new WebDriverWait(navegador, Duration.ofSeconds(15));
     }
 
     public void abrir() {
@@ -153,7 +153,11 @@ public class PaginaTareas {
             }
         }
         throw new IllegalStateException(
-                "La interacción no pudo completarse tras 3 intentos", ultimoFallo);
+                "La interacción no pudo completarse tras 3 intentos. Última causa: "
+                        + (ultimoFallo == null ? "desconocida"
+                           : ultimoFallo.getClass().getSimpleName() + ": "
+                             + ultimoFallo.getMessage()),
+                ultimoFallo);
     }
 
     /** Espera a que el documento esté completamente cargado y operable. */

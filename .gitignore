@@ -14,6 +14,16 @@ PLAN.md
 
 # ===== Entorno =====
 .env
+
+# Registro de auditoría en vivo. La evidencia de las ejecuciones
+# documentadas está versionada en docs/evidencias/.
+deploy/auditoria.log
+
+# Estado en tiempo de ejecución del balanceador. Lo genera
+# scripts/conmutar-trafico.sh, que además lo instala dentro del contenedor:
+# la configuración que nginx realmente lee vive en un volumen de Docker, no
+# aquí. Versionarlo solo ensuciaría el árbol en cada conmutación.
+deploy/nginx/conf.d/activo.conf
 *.local
 
 # ===== IDE =====

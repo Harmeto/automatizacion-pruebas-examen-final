@@ -17,7 +17,11 @@ VERSION="${2:?falta la versión}"
 SLOT="${3:?falta el slot}"
 RESULTADO="${4:?falta el resultado}"
 
-REGISTRO="docs/evidencias/auditoria-despliegues.log"
+# Se escribe en un archivo de estado en tiempo de ejecución, no en la evidencia
+# versionada. Si el script escribiera sobre el archivo del repositorio, cada
+# despliegue dejaría el árbol de trabajo sucio y bloquearía el cambio de rama,
+# que es justamente lo que hay que hacer para probar el rechazo del gate.
+REGISTRO="deploy/auditoria.log"
 mkdir -p "$(dirname "$REGISTRO")"
 
 COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo sin-commit)"

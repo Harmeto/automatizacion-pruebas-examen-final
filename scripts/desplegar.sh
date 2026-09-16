@@ -119,6 +119,20 @@ fi
 
 echo "  versión que responde: $(curl -s "http://localhost:${PUERTO_DESTINO}/api/version")"
 
+# Calentamiento antes de abrir el navegador.
+#
+# El health check responde UP apenas el contexto está listo, pero la primera
+# petición a una vista todavía paga la compilación de la plantilla y el
+# calentamiento de la máquina virtual. El navegador, que es mucho más estricto
+# con los tiempos que un curl, se encontraba con esa primera carga lenta y
+# agotaba la espera. Unas pocas peticiones previas dejan la aplicación en
+# régimen y hacen el gate determinista.
+echo "  calentando la aplicación antes del gate..."
+for _ in 1 2 3; do
+  curl -sf --max-time 10 "http://localhost:${PUERTO_DESTINO}/" -o /dev/null || true
+  curl -sf --max-time 10 "http://localhost:${PUERTO_DESTINO}/api/tareas" -o /dev/null || true
+done
+
 # ---------------------------------------------------------------------------
 etapa 4 "ACCEPTANCE TEST GATE contra el slot ${SLOT_DESTINO}"
 # ---------------------------------------------------------------------------

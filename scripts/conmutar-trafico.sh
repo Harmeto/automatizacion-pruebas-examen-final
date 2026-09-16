@@ -20,6 +20,8 @@ if [[ "$DESTINO" != "blue" && "$DESTINO" != "green" ]]; then
   exit 1
 fi
 
+mkdir -p "$(dirname "$ARCHIVO_ACTIVO")"
+
 cat > "$ARCHIVO_ACTIVO" <<CONF
 # Generado por scripts/conmutar-trafico.sh — no editar a mano.
 # Slot activo: ${DESTINO}

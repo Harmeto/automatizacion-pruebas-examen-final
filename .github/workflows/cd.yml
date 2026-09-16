@@ -1,0 +1,104 @@
+# =============================================================================
+# DEPLOYMENT PIPELINE — despliegue Blue-Green con Acceptance Test Gate
+#
+# Reproduce en un agente limpio exactamente el mismo flujo que se ejecuta en
+# local, invocando los mismos scripts versionados. Esa es la garantía de que
+# el procedimiento no depende de la máquina de nadie.
+#
+# Se dispara solo de forma manual. Levantar tres contenedores y un navegador
+# es costoso, y no aporta hacerlo ante cada commit: para eso está el pipeline
+# de CI, que es rápido.
+# =============================================================================
+
+name: CD - Despliegue Blue-Green
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versión a desplegar en el slot inactivo'
+        required: true
+        default: '1.1.0'
+      demostrar_rollback:
+        description: 'Ejecutar un rollback después de promover'
+        type: boolean
+        required: false
+        default: true
+
+jobs:
+
+  desplegar:
+    name: Desplegar y validar
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Preparar JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      - name: Verificar herramientas del agente
+        # Chrome viene preinstalado en el agente; Selenium Manager resuelve el
+        # driver que corresponda. Se deja constancia de las versiones porque
+        # forman parte de la configuración del entorno de prueba.
+        run: |
+          echo "Java:   $(java -version 2>&1 | head -1)"
+          echo "Docker: $(docker --version)"
+          echo "Chrome: $(google-chrome --version || echo 'no disponible')"
+
+      - name: Levantar el ambiente de prueba con la versión base
+        run: ./scripts/levantar-ambiente.sh 1.0.0
+
+      - name: Estado inicial del ambiente
+        run: ./scripts/estado.sh
+
+      # ---------------------------------------------------------------------
+      # El corazón del pipeline: despliega en el slot inactivo, corre el
+      # Acceptance Test Gate contra él y solo promueve si el gate aprueba.
+      # ---------------------------------------------------------------------
+      - name: Desplegar la versión ${{ inputs.version }}
+        id: despliegue
+        run: ./scripts/desplegar.sh "${{ inputs.version }}"
+
+      - name: Estado tras la promoción
+        run: ./scripts/estado.sh
+
+      - name: Demostrar el rollback
+        if: ${{ inputs.demostrar_rollback }}
+        run: |
+          ./scripts/rollback.sh "rollback de demostración ejecutado desde el pipeline"
+          ./scripts/estado.sh
+
+      - name: Registro de auditoría de la ejecución
+        if: always()
+        run: |
+          echo "## Auditoría del despliegue" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat deploy/auditoria.log >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publicar evidencia
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: evidencia-despliegue
+          path: |
+            docs/evidencias/
+            deploy/auditoria.log
+            target/cucumber-reports/
+          retention-days: 7
+
+      - name: Registros de los contenedores ante fallo
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --tail=80
+
+      - name: Desmontar el ambiente
+        if: always()
+        run: docker compose down -v

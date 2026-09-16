@@ -45,16 +45,22 @@
     <p class="error alerta-formulario" th:if="${mensajeError}" th:text="${mensajeError}"></p>
 
     <form method="post" th:action="@{/tareas}">
-      <label for="titulo">Título</label>
-      <input type="text" id="titulo" name="titulo" autocomplete="off">
+      <div class="campo">
+        <label for="titulo">Título</label>
+        <input type="text" id="titulo" name="titulo" autocomplete="off">
+      </div>
 
-      <label for="descripcion">Descripción</label>
-      <input type="text" id="descripcion" name="descripcion" autocomplete="off">
+      <div class="campo">
+        <label for="descripcion">Descripción</label>
+        <input type="text" id="descripcion" name="descripcion" autocomplete="off">
+      </div>
 
-      <label for="prioridad">Prioridad</label>
-      <select id="prioridad" name="prioridad">
-        <option th:each="p : ${prioridades}" th:value="${p}" th:text="${p}"></option>
-      </select>
+      <div class="campo">
+        <label for="prioridad">Prioridad</label>
+        <select id="prioridad" name="prioridad">
+          <option th:each="p : ${prioridades}" th:value="${p}" th:text="${p}"></option>
+        </select>
+      </div>
 
       <button type="submit" id="btn-crear">Agregar tarea</button>
     </form>

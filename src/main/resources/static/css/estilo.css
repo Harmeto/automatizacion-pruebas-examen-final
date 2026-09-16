@@ -82,6 +82,10 @@ h2 { font-size: 1.05rem; margin-bottom: 0.75rem; }
   align-items: end;
 }
 
+/* Cada campo agrupa su etiqueta con su control, para que la grilla alinee
+   pares y no elementos sueltos. */
+.campo { min-width: 0; }
+
 label { display: block; font-size: 0.8rem; color: var(--suave); margin-bottom: 0.2rem; }
 
 input, select {
