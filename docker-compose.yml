@@ -1,0 +1,50 @@
+# =============================================================================
+# Ambiente de prueba con despliegue Blue-Green.
+#
+#   balanceador  (nginx, puerto 8090)  -> único punto de entrada
+#   app-blue     (puerto interno 8080) -> slot azul
+#   app-green    (puerto interno 8080) -> slot verde
+#
+# Los dos slots corren siempre; lo que cambia es a cuál apunta el balanceador.
+# Esa es la razón por la que el rollback es instantáneo: la versión anterior
+# nunca se apagó, quedó en stand-by.
+#
+# Cada slot expone además un puerto directo (8091 y 8092) que NO es para los
+# usuarios: sirve para que el Acceptance Test Gate pruebe la versión recién
+# desplegada antes de darle tráfico real.
+# =============================================================================
+
+services:
+
+  balanceador:
+    image: nginx:1.27-alpine
+    container_name: gestor-balanceador
+    ports:
+      - "8090:80"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx/activo.conf:/etc/nginx/conf.d/activo.conf:ro
+    depends_on:
+      - app-blue
+      - app-green
+    restart: unless-stopped
+
+  app-blue:
+    image: gestor-tareas:${VERSION_BLUE:-1.0.0}
+    container_name: gestor-app-blue
+    environment:
+      APP_SLOT: blue
+      SERVER_PORT: 8080
+    ports:
+      - "8091:8080"
+    restart: unless-stopped
+
+  app-green:
+    image: gestor-tareas:${VERSION_GREEN:-1.0.0}
+    container_name: gestor-app-green
+    environment:
+      APP_SLOT: green
+      SERVER_PORT: 8080
+    ports:
+      - "8092:8080"
+    restart: unless-stopped
