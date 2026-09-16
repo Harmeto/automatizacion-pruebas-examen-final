@@ -42,7 +42,7 @@
   <section class="formulario">
     <h2>Nueva tarea</h2>
 
-    <p class="error" id="mensaje-error" th:if="${mensajeError}" th:text="${mensajeError}"></p>
+    <p class="error alerta-formulario" th:if="${mensajeError}" th:text="${mensajeError}"></p>
 
     <form method="post" th:action="@{/tareas}">
       <label for="titulo">Título</label>
