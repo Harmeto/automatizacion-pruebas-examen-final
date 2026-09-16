@@ -1,0 +1,52 @@
+###################################################################
+# EVIDENCIA 02 - Rollback a la version anterior
+#
+# Se simula la deteccion de un problema despues de promover la
+# version 1.1.0. El rollback es inmediato porque el slot anterior
+# nunca se apago: seguia sirviendo la version estable en stand-by.
+# Generado: 2026-09-16T02:10:22Z
+###################################################################
+
+=== 1. ESTADO ANTES: la version 1.1.0 esta recibiendo trafico ===
+================================================================
+ Ambiente de prueba — estado actual
+================================================================
+  slot activo (recibe tráfico) : green
+
+  a través del balanceador :8090
+    {"fechaBuild":"2026-09-16T02:09:41Z","version":"1.1.0","slot":"green","commitSha":"d687609"}
+
+  slot blue directo        :8091
+    {"fechaBuild":"2026-09-16T02:08:45Z","commitSha":"59f1fd2","slot":"blue","version":"1.0.0"}
+
+  slot green directo       :8092
+    {"fechaBuild":"2026-09-16T02:09:41Z","version":"1.1.0","slot":"green","commitSha":"d687609"}
+================================================================
+
+=== 2. EJECUCION DEL ROLLBACK ===
+================================================================
+ ROLLBACK
+================================================================
+  motivo        : se detectan errores en la version 1.1.0 tras la promocion
+  slot actual   : green
+  se revierte a : blue
+
+Tráfico conmutado al slot: blue (confirmado al intento 2)
+
+Rollback completado. El tráfico vuelve a la versión 1.0.0 (slot blue).
+
+=== 3. ESTADO DESPUES: el trafico volvio a la version 1.0.0 ===
+================================================================
+ Ambiente de prueba — estado actual
+================================================================
+  slot activo (recibe tráfico) : blue
+
+  a través del balanceador :8090
+    {"fechaBuild":"2026-09-16T02:08:45Z","commitSha":"59f1fd2","slot":"blue","version":"1.0.0"}
+
+  slot blue directo        :8091
+    {"fechaBuild":"2026-09-16T02:08:45Z","commitSha":"59f1fd2","slot":"blue","version":"1.0.0"}
+
+  slot green directo       :8092
+    {"fechaBuild":"2026-09-16T02:09:41Z","version":"1.1.0","slot":"green","commitSha":"d687609"}
+================================================================
