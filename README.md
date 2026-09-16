@@ -367,7 +367,16 @@ Todo en [`docs/evidencias/`](docs/evidencias):
 | [`03-gate-rechaza-version-defectuosa.txt`](docs/evidencias/03-gate-rechaza-version-defectuosa.txt) | Las 41 unitarias pasan, el gate rechaza, el tráfico no se mueve |
 | [`04-aplicacion-slot-blue.png`](docs/evidencias/04-aplicacion-slot-blue.png) | Interfaz sirviendo la versión 1.0.0 desde el slot azul |
 | [`05-aplicacion-slot-green-tras-despliegue.png`](docs/evidencias/05-aplicacion-slot-green-tras-despliegue.png) | La misma URL sirviendo la 1.1.0 desde el slot verde |
+| [`06-ci-github-actions.txt`](docs/evidencias/06-ci-github-actions.txt) | Detalle de la ejecución del pipeline de CI, con sus jobs y artefactos |
+| [`07-ci-ejecucion-exitosa.png`](docs/evidencias/07-ci-ejecucion-exitosa.png) | Las tres etapas del pipeline de CI en verde |
+| [`08-repositorio-ramas.png`](docs/evidencias/08-repositorio-ramas.png) | Ramas GitFlow publicadas en el repositorio |
 | [`auditoria-despliegues.log`](docs/evidencias/auditoria-despliegues.log) | Traza completa de despliegues, promociones y rollbacks |
+
+### El pipeline de integración continua
+
+![Ejecución del pipeline de CI](docs/evidencias/07-ci-ejecucion-exitosa.png)
+
+Las tres etapas en verde sobre un agente limpio, con los artefactos publicados.
 
 ### El despliegue, visto desde el navegador
 
