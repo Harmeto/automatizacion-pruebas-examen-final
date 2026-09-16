@@ -1,0 +1,41 @@
+###################################################################
+# EVIDENCIA 06 - Ejecucion exitosa del pipeline de CI en GitHub Actions
+# Repositorio: Harmeto/automatizacion-pruebas-examen-final
+# Generado: 2026-09-16T02:23:51Z
+###################################################################
+
+=== CORRIDAS ===
+completed	success	ci: agrega el pipeline de integración continua y su equivalente Jenkins	CI	feature/pipeline-ci	push	35047647235	2m13s	2026-09-16T02:21:13Z
+completed	success	Merge branch 'release/1.0.0' into main	CI	main	push	35047639767	2m2s	2026-09-16T02:21:06Z
+
+=== DETALLE DE LA CORRIDA SOBRE main ===
+
+✓ main CI · 35047639767
+Triggered via push about 2 minutes ago
+
+JOBS
+✓ Build, análisis estático y pruebas unitarias in 1m14s (ID 104640883977)
+✓ Pruebas de integración in 38s (ID 104641136929)
+✓ Resumen de la ejecución in 2s (ID 104641266337)
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-java@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build, análisis estático y pruebas unitarias: .github#2
+
+! setup-java v4 is deprecated and will no longer receive updates. Please migrate to actions/setup-java@v5.
+Build, análisis estático y pruebas unitarias: .github#18
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-java@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Pruebas de integración: .github#2
+
+! setup-java v4 is deprecated and will no longer receive updates. Please migrate to actions/setup-java@v5.
+Pruebas de integración: .github#18
+
+
+ARTIFACTS
+aplicacion-jar
+reportes-integracion
+reportes-unitarias
+
+For more information about a job, try: gh run view --job=<job-id>
+View this run on GitHub: https://github.com/Harmeto/automatizacion-pruebas-examen-final/actions/runs/35047639767
