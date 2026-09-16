@@ -113,6 +113,28 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- JUnit 5 y Mockito llegan de forma transitiva con el starter anterior,
+         pero se declaran explícitamente porque el código de prueba los usa de
+         forma directa. Declarar las dependencias directas es buena práctica:
+         deja el pom autoexplicativo y evita que el proyecto dependa por
+         accidente del árbol transitivo de otro artefacto. Las versiones las
+         sigue gestionando el parent, de modo que no hay riesgo de descalce. -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Selenium WebDriver: automatización de la interfaz para los acceptance
          tests. Exigido explícitamente por el enunciado del examen. -->
     <dependency>
