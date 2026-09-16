@@ -297,6 +297,16 @@
       <id>acceptance</id>
       <build>
         <plugins>
+          <!--
+            Las unitarias ya se ejecutaron en la etapa de commit; repetirlas
+            aquí solo alargaría el gate sin aportar información nueva.
+          -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration><skipTests>true</skipTests></configuration>
+          </plugin>
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>

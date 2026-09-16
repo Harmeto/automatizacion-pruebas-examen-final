@@ -21,7 +21,7 @@ public class InfoDespliegue {
     private final String fechaBuild;
 
     public InfoDespliegue(
-            @Value("${info.app.version:desconocida}") String version,
+            @Value("${APP_VERSION:${info.app.version:desconocida}}") String version,
             @Value("${APP_SLOT:local}") String slot,
             @Value("${BUILD_SHA:sin-commit}") String commitSha,
             @Value("${BUILD_TIME:sin-fecha}") String fechaBuild) {

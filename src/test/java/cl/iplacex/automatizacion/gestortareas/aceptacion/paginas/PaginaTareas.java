@@ -2,9 +2,12 @@ package cl.iplacex.automatizacion.gestortareas.aceptacion.paginas;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Supplier;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -43,18 +46,20 @@ public class PaginaTareas {
 
     /** Completa y envía el formulario de alta, esperando la recarga resultante. */
     public void crearTarea(String titulo, String prioridad) {
-        WebElement campoTitulo = espera.until(
-                ExpectedConditions.elementToBeClickable(By.id("titulo")));
-        campoTitulo.clear();
-        campoTitulo.sendKeys(titulo);
+        conReintento(() -> {
+            WebElement campoTitulo = espera.until(
+                    ExpectedConditions.elementToBeClickable(By.id("titulo")));
+            campoTitulo.clear();
+            campoTitulo.sendKeys(titulo);
 
-        WebElement campoDescripcion = navegador.findElement(By.id("descripcion"));
-        campoDescripcion.clear();
-        campoDescripcion.sendKeys("creada por el acceptance test");
+            WebElement campoDescripcion = navegador.findElement(By.id("descripcion"));
+            campoDescripcion.clear();
+            campoDescripcion.sendKeys("creada por el acceptance test");
 
-        new Select(navegador.findElement(By.id("prioridad"))).selectByValue(prioridad);
+            new Select(navegador.findElement(By.id("prioridad"))).selectByValue(prioridad);
 
-        enviarYEsperarRecarga(navegador.findElement(By.id("btn-crear")));
+            return navegador.findElement(By.id("btn-crear"));
+        });
     }
 
     public boolean muestraTarea(String titulo) {
@@ -67,11 +72,11 @@ public class PaginaTareas {
     }
 
     public void completar(String titulo) {
-        enviarYEsperarRecarga(filaDe(titulo).findElement(By.cssSelector("button[id^='completar-']")));
+        conReintento(() -> filaDe(titulo).findElement(By.cssSelector("button[id^='completar-']")));
     }
 
     public void eliminar(String titulo) {
-        enviarYEsperarRecarga(filaDe(titulo).findElement(By.cssSelector("button[id^='eliminar-']")));
+        conReintento(() -> filaDe(titulo).findElement(By.cssSelector("button[id^='eliminar-']")));
     }
 
     public int totalMostrado() {
@@ -124,7 +129,38 @@ public class PaginaTareas {
         esperarPaginaLista();
     }
 
+    /**
+     * Ejecuta una interacción que provoca navegación, reintentando si el
+     * navegador reporta que la referencia quedó obsoleta.
+     *
+     * <p>El formulario se envía por POST y la aplicación responde con una
+     * redirección, de modo que el navegador atraviesa un documento intermedio.
+     * Si se localiza un elemento justo en ese instante, la referencia deja de
+     * pertenecer al documento final y el clic falla. En vez de alargar las
+     * esperas a ciegas, se vuelve a localizar el elemento y se reintenta: es
+     * determinista y no penaliza el caso normal, que acierta al primer intento.
+     */
+    private void conReintento(Supplier<WebElement> localizador) {
+        WebDriverException ultimoFallo = null;
+
+        for (int intento = 1; intento <= 3; intento++) {
+            try {
+                esperarPaginaLista();
+                enviarYEsperarRecarga(localizador.get());
+                return;
+            } catch (WebDriverException fallo) {
+                ultimoFallo = fallo;
+            }
+        }
+        throw new IllegalStateException(
+                "La interacción no pudo completarse tras 3 intentos", ultimoFallo);
+    }
+
+    /** Espera a que el documento esté completamente cargado y operable. */
     private void esperarPaginaLista() {
+        espera.until(navegadorActual ->
+                "complete".equals(((JavascriptExecutor) navegadorActual)
+                        .executeScript("return document.readyState")));
         espera.until(ExpectedConditions.elementToBeClickable(By.id("btn-crear")));
     }
 
