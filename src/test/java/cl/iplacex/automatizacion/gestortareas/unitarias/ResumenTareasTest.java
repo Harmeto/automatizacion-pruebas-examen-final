@@ -13,8 +13,8 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Pruebas unitarias del cálculo de avance.
  *
  * <p>Es lógica pura, sin dependencias ni estado: se ejecuta en milisegundos y
- * nunca es intermitente. Es el tipo de prueba que ME_4-3 §3.1 sitúa en la base
- * de la estrategia y que corre en la etapa de commit del pipeline.
+ * nunca es intermitente. Es el tipo de prueba que está en la base de
+ * la pirámide y que corre en la etapa de commit del pipeline.
  */
 @DisplayName("Cálculo del resumen de tareas")
 class ResumenTareasTest {
@@ -40,7 +40,7 @@ class ResumenTareasTest {
 
     /**
      * Datos parametrizados: cubren varios escenarios con una sola lógica de
-     * prueba, práctica recomendada en ME_3-3 §3.2.
+     * prueba, práctica recomendada para las suites.
      */
     @ParameterizedTest(name = "{0} tareas con {1} completadas => {2} % de avance")
     @CsvSource({

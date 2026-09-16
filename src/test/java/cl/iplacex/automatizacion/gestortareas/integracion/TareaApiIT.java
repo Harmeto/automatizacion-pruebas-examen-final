@@ -21,10 +21,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
  * <p>A diferencia de las unitarias, estas levantan el contexto completo de
  * Spring, un servidor HTTP en un puerto real y la base de datos H2. Verifican
  * la interacción entre controlador, servicio, repositorio y persistencia:
- * el caso "API + base de datos" que describe ME_4-3 §3.1.
+ * el caso "API + base de datos" de la estrategia de pruebas.
  *
  * <p><b>Idempotencia:</b> cada prueba limpia el repositorio antes de ejecutarse
- * (ME_3-3 §3.2), de modo que la suite puede repetirse indefinidamente y en
+ * , de modo que la suite puede repetirse indefinidamente y en
  * cualquier orden sin arrastrar estado entre casos.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

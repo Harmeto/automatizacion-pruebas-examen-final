@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * <p>Es la superficie que automatizan los escenarios BDD con Selenium. Los
  * identificadores de los elementos HTML (ids estables, sin depender de
  * posición ni de texto) están pensados para que los Page Objects sean
- * robustos frente a cambios de maquetación (ME_4-3 §1.3).
+ * robustos frente a cambios de maquetación.
  */
 @Controller
 public class TareaWebControlador {
