@@ -29,22 +29,29 @@ VERSION_BLUE=${VERSION}
 VERSION_GREEN=${VERSION}
 ENV
 
-./scripts/conmutar-trafico.sh blue 2>/dev/null || {
-  # En el primer arranque nginx aún no existe, así que se escribe la
-  # configuración directamente y se levanta todo después.
-  sed -i.bak 's/app-green/app-blue/; s/Slot activo: green/Slot activo: blue/' deploy/nginx/activo.conf
-  rm -f deploy/nginx/activo.conf.bak
-}
-
 docker compose up -d
+
+# El volumen del balanceador parte vacío, así que la configuración se instala
+# una vez que el contenedor ya existe. Hasta entonces nginx no tiene ningún
+# server block y no responde: es el estado esperado durante el arranque.
+echo "Esperando a que el balanceador acepte configuración..."
+for i in $(seq 1 20); do
+  sleep 1
+  if docker compose exec -T balanceador true 2>/dev/null; then
+    break
+  fi
+done
+
+./scripts/conmutar-trafico.sh blue
+
 echo "Esperando a que el ambiente responda..."
 for i in $(seq 1 40); do
-  sleep 2
   if curl -sf --max-time 3 http://localhost:8090/api/version >/dev/null 2>&1; then
     echo "Ambiente disponible en http://localhost:8090"
     ./scripts/estado.sh
     exit 0
   fi
+  sleep 2
 done
 
 echo "El ambiente no respondió a tiempo."

@@ -22,8 +22,20 @@ services:
     ports:
       - "8090:80"
     volumes:
-      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./deploy/nginx/activo.conf:/etc/nginx/conf.d/activo.conf:ro
+      # Volumen de Docker, NO un bind mount del host.
+      #
+      # Un bind mount queda atado al inodo del host, y git no edita los
+      # archivos sino que los reemplaza. Al cambiar de rama cambian los
+      # inodos del archivo y del directorio, el contenedor queda apuntando a
+      # algo que ya no existe, y nginx se encuentra sin configuración pese a
+      # que desde el host todo se ve correcto. El síntoma es desconcertante y
+      # aparece justo al cambiar de rama, que es algo habitual en este flujo.
+      #
+      # El volumen vive dentro de Docker: es inmune a lo que haga git y
+      # además sobrevive a un reinicio del contenedor. La configuración la
+      # instala scripts/conmutar-trafico.sh, que es el único que decide a qué
+      # slot va el tráfico.
+      - config-balanceador:/etc/nginx/conf.d
     depends_on:
       - app-blue
       - app-green
@@ -48,3 +60,8 @@ services:
     ports:
       - "8092:8080"
     restart: unless-stopped
+
+volumes:
+  # Guarda la configuración del slot activo, de modo que el balanceador
+  # recuerda a dónde enrutar aunque se reinicie el contenedor.
+  config-balanceador:

@@ -13,7 +13,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 DESTINO="${1:-}"
-ARCHIVO_ACTIVO="deploy/nginx/activo.conf"
+ARCHIVO_ACTIVO="deploy/nginx/conf.d/activo.conf"
 
 if [[ "$DESTINO" != "blue" && "$DESTINO" != "green" ]]; then
   echo "Uso: $0 <blue|green>"
@@ -26,6 +26,12 @@ cat > "$ARCHIVO_ACTIVO" <<CONF
 server {
     listen 80;
 
+    # Tiempos cortos: si el slot activo deja de responder se nota de
+    # inmediato, en vez de dejar la petición colgada.
+    proxy_connect_timeout 3s;
+    proxy_send_timeout   10s;
+    proxy_read_timeout   10s;
+
     location / {
         proxy_pass http://app-${DESTINO}:8080;
         proxy_set_header Host              \$host;
@@ -35,6 +41,15 @@ server {
     }
 }
 CONF
+
+# La configuración se instala dentro del contenedor, sobre el volumen de
+# Docker. La copia del repositorio queda como registro versionado de cuál fue
+# el último estado aplicado, pero no es la que lee nginx.
+docker compose exec -T balanceador sh -c 'cat > /etc/nginx/conf.d/activo.conf' < "$ARCHIVO_ACTIVO"
+
+# La imagen trae un default.conf que también escucha en el puerto 80 y se
+# quedaría con las peticiones al ser el primer server block. Se retira.
+docker compose exec -T balanceador rm -f /etc/nginx/conf.d/default.conf
 
 # Recarga en caliente: nginx relee la configuración sin reiniciar el proceso.
 docker compose exec -T balanceador nginx -s reload 2>/dev/null

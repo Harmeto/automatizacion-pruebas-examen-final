@@ -32,7 +32,7 @@ export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/
 separador() { echo "================================================================"; }
 etapa() { echo; separador; echo " ETAPA $1 — $2"; separador; }
 
-SLOT_ACTIVO="$(grep -o 'Slot activo: .*' deploy/nginx/activo.conf | cut -d' ' -f3)"
+SLOT_ACTIVO="$(./scripts/slot-activo.sh)"
 if [[ "$SLOT_ACTIVO" == "blue" ]]; then
   SLOT_DESTINO="green"; PUERTO_DESTINO=8092
 else

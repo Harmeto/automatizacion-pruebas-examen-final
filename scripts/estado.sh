@@ -9,7 +9,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 
 slot_activo() {
-  grep -o 'Slot activo: .*' deploy/nginx/activo.conf | cut -d' ' -f3
+  ./scripts/slot-activo.sh
 }
 
 consultar() {
