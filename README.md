@@ -81,6 +81,8 @@ la forma del trabajo en lugar de aplanarlo:
 git log --oneline --graph --all
 ```
 
+![Ramas del repositorio](docs/evidencias/08-repositorio-ramas.png)
+
 Hay además una rama `experimento/regresion-interfaz` **que nunca se integró**.
 Contiene una regresión deliberada y existe como evidencia de la Actividad 3: es el
 cambio que el Acceptance Test Gate rechazó. Que siga sin fusionarse es exactamente
