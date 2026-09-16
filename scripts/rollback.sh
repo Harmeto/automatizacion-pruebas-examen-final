@@ -18,7 +18,7 @@ cd "$(dirname "$0")/.."
 
 MOTIVO="${1:-rollback solicitado manualmente}"
 
-SLOT_ACTUAL="$(grep -o 'Slot activo: .*' deploy/nginx/activo.conf | cut -d' ' -f3)"
+SLOT_ACTUAL="$(grep -o 'Slot activo: .*' deploy/nginx/conf.d/activo.conf | cut -d' ' -f3)"
 
 if [[ "$SLOT_ACTUAL" == "blue" ]]; then
   SLOT_ANTERIOR="green"

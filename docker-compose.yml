@@ -22,8 +22,15 @@ services:
     ports:
       - "8090:80"
     volumes:
-      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./deploy/nginx/activo.conf:/etc/nginx/conf.d/activo.conf:ro
+      # Se monta el DIRECTORIO, no archivos sueltos. Un bind mount de archivo
+      # queda atado al inodo: cuando git reescribe ese archivo al cambiar de
+      # rama, el contenedor queda apuntando a un inodo que ya no existe y
+      # nginx deja de encontrar su configuración. Montando el directorio, la
+      # ruta se resuelve de nuevo en cada acceso y el problema desaparece.
+      #
+      # Se conserva el nginx.conf que trae la imagen, que ya incluye
+      # mime.types y hace include de conf.d/*.conf.
+      - ./deploy/nginx/conf.d:/etc/nginx/conf.d:ro
     depends_on:
       - app-blue
       - app-green
