@@ -1,0 +1,34 @@
+# ===== Build =====
+target/
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+
+# ===== Material de estudio del curso =====
+# Los PDF de las unidades son material con derechos de autor del instituto:
+# se usan como insumo local, no se publican en el repositorio.
+unidades/
+
+# ===== Documento de trabajo interno =====
+PLAN.md
+
+# ===== Entorno =====
+.env
+*.local
+
+# ===== IDE =====
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# ===== Sistema operativo =====
+.DS_Store
+Thumbs.db
+
+# ===== Artefactos temporales de pruebas =====
+# ME_3-3 §3.5: "automatiza la limpieza de artefactos temporales".
+target/cucumber-reports/
+capturas-fallos/
