@@ -32,8 +32,8 @@ ENV
 ./scripts/conmutar-trafico.sh blue 2>/dev/null || {
   # En el primer arranque nginx aún no existe, así que se escribe la
   # configuración directamente y se levanta todo después.
-  sed -i.bak 's/app-green/app-blue/; s/Slot activo: green/Slot activo: blue/' deploy/nginx/activo.conf
-  rm -f deploy/nginx/activo.conf.bak
+  sed -i.bak 's/app-green/app-blue/; s/Slot activo: green/Slot activo: blue/' deploy/nginx/conf.d/activo.conf
+  rm -f deploy/nginx/conf.d/activo.conf.bak
 }
 
 docker compose up -d

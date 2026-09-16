@@ -13,7 +13,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 DESTINO="${1:-}"
-ARCHIVO_ACTIVO="deploy/nginx/activo.conf"
+ARCHIVO_ACTIVO="deploy/nginx/conf.d/activo.conf"
 
 if [[ "$DESTINO" != "blue" && "$DESTINO" != "green" ]]; then
   echo "Uso: $0 <blue|green>"
@@ -25,6 +25,12 @@ cat > "$ARCHIVO_ACTIVO" <<CONF
 # Slot activo: ${DESTINO}
 server {
     listen 80;
+
+    # Tiempos cortos: si el slot activo deja de responder se nota de
+    # inmediato, en vez de dejar la petición colgada.
+    proxy_connect_timeout 3s;
+    proxy_send_timeout   10s;
+    proxy_read_timeout   10s;
 
     location / {
         proxy_pass http://app-${DESTINO}:8080;
