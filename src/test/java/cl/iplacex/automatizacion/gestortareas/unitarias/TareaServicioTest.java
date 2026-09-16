@@ -32,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * <p>El repositorio se sustituye por un mock de Mockito: estas pruebas no
  * tocan la base de datos ni levantan el contexto de Spring. Esa es
  * precisamente la diferencia con las pruebas de integración, y lo que les
- * permite correr en la etapa de commit del pipeline (ME_5-3 §1.3.2).
+ * permite correr en la etapa de commit del pipeline.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Reglas de negocio del servicio de tareas")

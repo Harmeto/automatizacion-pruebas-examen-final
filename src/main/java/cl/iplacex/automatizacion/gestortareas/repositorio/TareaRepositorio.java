@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
  * Acceso a datos de las tareas.
  *
  * <p>Al ser una interfaz, el servicio puede probarse unitariamente sustituyéndola
- * por un mock de Mockito, sin levantar base de datos alguna (ME_3-3 §3.3).
+ * por un mock de Mockito, sin levantar base de datos alguna.
  */
 @Repository
 public interface TareaRepositorio extends JpaRepository<Tarea, Long> {

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 /**
  * Metadatos de auditoría del despliegue.
  *
- * <p>ME_6-3 §5.3 exige registrar "build metadata: ID de build, commit SHA,
- * número de versión, branch de origen" como evidencia verificable. Exponerlos
+ * <p>La auditoría de despliegues exige registrar el identificador de build,
+ * el commit, la versión y la rama de origen como evidencia verificable. Exponerlos
  * por HTTP cumple además un segundo propósito práctico: es lo que permite
  * demostrar con un simple {@code curl} qué slot (blue o green) está sirviendo
  * tráfico en cada momento, y por lo tanto evidenciar el switch y el rollback.
