@@ -1,0 +1,146 @@
+# =============================================================================
+# PIPELINE DE INTEGRACIÓN CONTINUA
+#
+# Se dispara ante cada cambio y ejecuta los dos primeros niveles de la
+# estrategia de pruebas. Está dividido en dos jobs encadenados en lugar de uno
+# solo, para que el fallo sea localizable de inmediato: si algo se rompe, se
+# sabe si fue al compilar, en las unitarias o en las de integración, sin tener
+# que leer un registro largo.
+#
+# El orden aplica el criterio de fallar rápido: primero lo barato (compilación,
+# análisis estático, unitarias) y solo después lo caro (levantar el contexto y
+# la base de datos).
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**', 'fix/**']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '21'
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # ETAPA DE COMMIT
+  # Feedback inmediato al autor del cambio. Debe ser rápida: si tarda, deja de
+  # cumplir su propósito.
+  # ---------------------------------------------------------------------------
+  commit:
+    name: Build, análisis estático y pruebas unitarias
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del commit disparador
+        uses: actions/checkout@v4
+
+      - name: Preparar JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          # Cachea ~/.m2 entre ejecuciones: acelera el build sin afectar el
+          # resultado, porque las versiones de las dependencias son explícitas.
+          cache: maven
+
+      - name: Compilar
+        run: ./mvnw -B compile
+
+      - name: Análisis estático
+        # Equivale al lugar que ocuparían SonarQube o Snyk en un entorno
+        # corporativo. Cualquier hallazgo detiene el pipeline.
+        run: ./mvnw -B spotbugs:check
+
+      - name: Pruebas unitarias y gate de cobertura
+        # El gate de cobertura está configurado en el pom: si baja del 80 %,
+        # este paso falla y el pipeline no avanza.
+        run: ./mvnw -B test
+
+      - name: Empaquetar el artefacto
+        run: ./mvnw -B package -DskipTests -Djacoco.skip=true
+
+      - name: Publicar resultados de las unitarias
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-unitarias
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+          retention-days: 7
+
+      - name: Publicar el artefacto construido
+        uses: actions/upload-artifact@v4
+        with:
+          name: aplicacion-jar
+          path: target/gestor-tareas-*.jar
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # PRUEBAS DE INTEGRACIÓN
+  # Más lentas: levantan el contexto de Spring y la base de datos. Por eso van
+  # después y solo si la etapa de commit pasó.
+  # ---------------------------------------------------------------------------
+  integracion:
+    name: Pruebas de integración
+    runs-on: ubuntu-latest
+    needs: commit
+
+    steps:
+      - name: Checkout del commit disparador
+        uses: actions/checkout@v4
+
+      - name: Preparar JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Ejecutar pruebas de integración
+        # verify ejecuta las clases *IT con Failsafe. De paso vuelve a correr
+        # las unitarias, que tardan segundos: no vale la pena complicar el
+        # comando para evitarlo, y sirve de verificación cruzada.
+        run: ./mvnw -B verify
+
+      - name: Publicar resultados de integración
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-integracion
+          path: target/failsafe-reports/
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # RESUMEN
+  # Consolida el estado de la ejecución en la propia página del pipeline, para
+  # no tener que abrir cada job por separado.
+  # ---------------------------------------------------------------------------
+  resumen:
+    name: Resumen de la ejecución
+    runs-on: ubuntu-latest
+    needs: [commit, integracion]
+    if: always()
+
+    steps:
+      - name: Escribir el resumen
+        run: |
+          {
+            echo "## Resultado del pipeline de CI"
+            echo ""
+            echo "| Etapa | Resultado |"
+            echo "|---|---|"
+            echo "| Build, análisis estático y unitarias | ${{ needs.commit.result }} |"
+            echo "| Pruebas de integración | ${{ needs.integracion.result }} |"
+            echo ""
+            echo "Commit: \`${{ github.sha }}\` · Rama: \`${{ github.ref_name }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fallar si alguna etapa no pasó
+        if: needs.commit.result != 'success' || needs.integracion.result != 'success'
+        run: exit 1
