@@ -290,6 +290,9 @@ Sin este registro, un rollback exitoso no dejaría ninguna huella de haber ocurr
 
 ## 7. Cómo ejecutar
 
+> Para una verificación guiada punto por punto de lo que pide el examen, con el
+> resultado esperado en cada paso, ver [`docs/COMO-VERIFICAR.md`](docs/COMO-VERIFICAR.md).
+
 ### Requisitos
 
 Docker, y nada más. El JDK y Maven los resuelve el wrapper; el driver de Chrome lo
