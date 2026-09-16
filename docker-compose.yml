@@ -1,0 +1,67 @@
+# =============================================================================
+# Ambiente de prueba con despliegue Blue-Green.
+#
+#   balanceador  (nginx, puerto 8090)  -> único punto de entrada
+#   app-blue     (puerto interno 8080) -> slot azul
+#   app-green    (puerto interno 8080) -> slot verde
+#
+# Los dos slots corren siempre; lo que cambia es a cuál apunta el balanceador.
+# Esa es la razón por la que el rollback es instantáneo: la versión anterior
+# nunca se apagó, quedó en stand-by.
+#
+# Cada slot expone además un puerto directo (8091 y 8092) que NO es para los
+# usuarios: sirve para que el Acceptance Test Gate pruebe la versión recién
+# desplegada antes de darle tráfico real.
+# =============================================================================
+
+services:
+
+  balanceador:
+    image: nginx:1.27-alpine
+    container_name: gestor-balanceador
+    ports:
+      - "8090:80"
+    volumes:
+      # Volumen de Docker, NO un bind mount del host.
+      #
+      # Un bind mount queda atado al inodo del host, y git no edita los
+      # archivos sino que los reemplaza. Al cambiar de rama cambian los
+      # inodos del archivo y del directorio, el contenedor queda apuntando a
+      # algo que ya no existe, y nginx se encuentra sin configuración pese a
+      # que desde el host todo se ve correcto. El síntoma es desconcertante y
+      # aparece justo al cambiar de rama, que es algo habitual en este flujo.
+      #
+      # El volumen vive dentro de Docker: es inmune a lo que haga git y
+      # además sobrevive a un reinicio del contenedor. La configuración la
+      # instala scripts/conmutar-trafico.sh, que es el único que decide a qué
+      # slot va el tráfico.
+      - config-balanceador:/etc/nginx/conf.d
+    depends_on:
+      - app-blue
+      - app-green
+    restart: unless-stopped
+
+  app-blue:
+    image: gestor-tareas:${VERSION_BLUE:-1.0.0}
+    container_name: gestor-app-blue
+    environment:
+      APP_SLOT: blue
+      SERVER_PORT: 8080
+    ports:
+      - "8091:8080"
+    restart: unless-stopped
+
+  app-green:
+    image: gestor-tareas:${VERSION_GREEN:-1.0.0}
+    container_name: gestor-app-green
+    environment:
+      APP_SLOT: green
+      SERVER_PORT: 8080
+    ports:
+      - "8092:8080"
+    restart: unless-stopped
+
+volumes:
+  # Guarda la configuración del slot activo, de modo que el balanceador
+  # recuerda a dónde enrutar aunque se reinicie el contenedor.
+  config-balanceador:

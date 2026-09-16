@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestor de Tareas</title>
+  <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+<header class="cabecera">
+  <h1>Gestor de Tareas</h1>
+  <!-- El slot activo se muestra en pantalla: así una captura del navegador
+       sirve como evidencia del despliegue Blue-Green, igual que el curl. -->
+  <p class="despliegue">
+    versión <span id="app-version" th:text="${info.version}">-</span>
+    · slot <span id="app-slot" th:text="${info.slot}">-</span>
+  </p>
+</header>
+
+<main>
+
+  <section class="resumen" id="resumen">
+    <div class="dato">
+      <span class="numero" id="resumen-total" th:text="${resumen.total}">0</span>
+      <span class="etiqueta">totales</span>
+    </div>
+    <div class="dato">
+      <span class="numero" id="resumen-pendientes" th:text="${resumen.pendientes}">0</span>
+      <span class="etiqueta">pendientes</span>
+    </div>
+    <div class="dato">
+      <span class="numero" id="resumen-completadas" th:text="${resumen.completadas}">0</span>
+      <span class="etiqueta">completadas</span>
+    </div>
+    <div class="dato">
+      <span class="numero" id="resumen-avance" th:text="${resumen.porcentajeAvance} + ' %'">0 %</span>
+      <span class="etiqueta">avance</span>
+    </div>
+  </section>
+
+  <section class="formulario">
+    <h2>Nueva tarea</h2>
+
+    <p class="error" id="mensaje-error" th:if="${mensajeError}" th:text="${mensajeError}"></p>
+
+    <form method="post" th:action="@{/tareas}">
+      <div class="campo">
+        <label for="titulo">Título</label>
+        <input type="text" id="titulo" name="titulo" autocomplete="off">
+      </div>
+
+      <div class="campo">
+        <label for="descripcion">Descripción</label>
+        <input type="text" id="descripcion" name="descripcion" autocomplete="off">
+      </div>
+
+      <div class="campo">
+        <label for="prioridad">Prioridad</label>
+        <select id="prioridad" name="prioridad">
+          <option th:each="p : ${prioridades}" th:value="${p}" th:text="${p}"></option>
+        </select>
+      </div>
+
+      <button type="submit" id="btn-crear">Agregar tarea</button>
+    </form>
+  </section>
+
+  <section class="listado">
+    <h2>Tareas registradas</h2>
+
+    <p id="sin-tareas" th:if="${#lists.isEmpty(tareas)}">No hay tareas registradas.</p>
+
+    <table id="tabla-tareas" th:unless="${#lists.isEmpty(tareas)}">
+      <thead>
+      <tr>
+        <th>Título</th>
+        <th>Descripción</th>
+        <th>Prioridad</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="tarea : ${tareas}"
+          th:id="'tarea-' + ${tarea.id}"
+          th:classappend="${tarea.completada} ? 'completada' : 'pendiente'">
+        <td class="celda-titulo" th:text="${tarea.titulo}"></td>
+        <td th:text="${tarea.descripcion}"></td>
+        <td th:text="${tarea.prioridad}"></td>
+        <td class="celda-estado" th:text="${tarea.completada} ? 'Completada' : 'Pendiente'"></td>
+        <td class="acciones">
+          <form method="post" th:action="@{'/tareas/' + ${tarea.id} + '/completar'}" th:unless="${tarea.completada}">
+            <button type="submit" th:id="'completar-' + ${tarea.id}">Completar</button>
+          </form>
+          <form method="post" th:action="@{'/tareas/' + ${tarea.id} + '/eliminar'}">
+            <button type="submit" th:id="'eliminar-' + ${tarea.id}" class="peligro">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+</body>
+</html>

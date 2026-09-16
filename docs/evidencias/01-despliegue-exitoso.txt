@@ -1,0 +1,208 @@
+###################################################################
+# EVIDENCIA 01 - Despliegue Blue-Green exitoso
+#
+# La version 1.1.0 se despliega en el slot inactivo, supera el
+# Acceptance Test Gate y recien entonces recibe trafico.
+# Generado: 2026-09-16T02:09:40Z
+###################################################################
+
+=== ESTADO INICIAL ===
+================================================================
+ Ambiente de prueba — estado actual
+================================================================
+  slot activo (recibe tráfico) : blue
+
+  a través del balanceador :8090
+    {"fechaBuild":"2026-09-16T02:08:45Z","commitSha":"59f1fd2","slot":"blue","version":"1.0.0"}
+
+  slot blue directo        :8091
+    {"fechaBuild":"2026-09-16T02:08:45Z","commitSha":"59f1fd2","slot":"blue","version":"1.0.0"}
+
+  slot green directo       :8092
+    {"fechaBuild":"2026-09-16T02:08:45Z","version":"1.0.0","slot":"green","commitSha":"59f1fd2"}
+================================================================
+
+=== EJECUCION DEL DEPLOYMENT PIPELINE ===
+================================================================
+ DESPLIEGUE BLUE-GREEN
+================================================================
+  versión a desplegar : 1.1.0
+  slot activo ahora   : blue  (sigue atendiendo usuarios)
+  slot de destino     : green  (recibe la versión nueva)
+
+================================================================
+ ETAPA 1 — Empaquetado y construcción de la imagen
+================================================================
+  artefacto: target/gestor-tareas-1.0.0.jar
+  imagen construida: gestor-tareas:1.1.0
+
+================================================================
+ ETAPA 2 — Despliegue en el slot inactivo (green)
+================================================================
+  contenedor app-green recreado con la versión 1.1.0
+
+================================================================
+ ETAPA 3 — Verificación de salud del slot green
+================================================================
+  slot green sano tras 3 intento(s)
+  versión que responde: {"fechaBuild":"2026-09-16T02:09:41Z","version":"1.1.0","slot":"green","commitSha":"d687609"}
+
+================================================================
+ ETAPA 4 — ACCEPTANCE TEST GATE contra el slot green
+================================================================
+  ejecutando escenarios BDD contra http://localhost:8092
+
+[INFO] Scanning for projects...
+[INFO] --------------< cl.iplacex.automatizacion:gestor-tareas >---------------
+[INFO] Building Gestor de Tareas 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] --- jacoco:0.8.12:prepare-agent (preparar-agente) @ gestor-tareas ---
+[INFO] Skipping JaCoCo execution because property jacoco.skip is set.
+[INFO] argLine set to empty
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestor-tareas ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] --- compiler:3.14.0:compile (default-compile) @ gestor-tareas ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ gestor-tareas ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ gestor-tareas ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] --- surefire:3.5.3:test (default-test) @ gestor-tareas ---
+[INFO] Tests are skipped.
+[INFO] --- jacoco:0.8.12:report (reporte-cobertura) @ gestor-tareas ---
+[INFO] Skipping JaCoCo execution because property jacoco.skip is set.
+[INFO] --- jacoco:0.8.12:check (gate-cobertura) @ gestor-tareas ---
+[INFO] Skipping JaCoCo execution because property jacoco.skip is set.
+[INFO] --- jar:3.4.2:jar (default-jar) @ gestor-tareas ---
+[INFO] --- spring-boot:3.5.0:repackage (repackage) @ gestor-tareas ---
+[INFO] Replacing main artifact /Users/harmeto/automatizacion/target/gestor-tareas-1.0.0.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /Users/harmeto/automatizacion/target/gestor-tareas-1.0.0.jar.original
+[INFO] --- failsafe:3.5.3:integration-test (default) @ gestor-tareas ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[WARNING] System property [acceptance.url] overwritten by user properties from Maven session
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running cl.iplacex.automatizacion.gestortareas.aceptacion.RunAcceptanceIT
+
+@acceptance @smoke
+Escenario: La aplicación responde e informa qué versión está sirviendo # features/gestion_tareas.feature:16
+  Dado que la aplicación está desplegada y disponible                  # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                                      # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Entonces la página muestra el identificador del slot desplegado      # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laPaginaMuestraElSlot()
+  Y el resumen indica 0 tareas totales                                 # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elResumenIndicaTotales(int)
+
+@acceptance
+Escenario: Registrar una tarea nueva                             # features/gestion_tareas.feature:21
+  Dado que la aplicación está desplegada y disponible            # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                                # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Y registro la tarea "Preparar el informe" con prioridad "ALTA" # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroLaTarea(java.lang.String,java.lang.String)
+  Entonces la tarea "Preparar el informe" aparece en el listado  # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laTareaAparece(java.lang.String)
+  Y el resumen indica 1 tareas totales                           # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elResumenIndicaTotales(int)
+  Y el avance mostrado es 0 por ciento                           # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elAvanceMostradoEs(int)
+
+@acceptance
+Escenario: Completar una tarea actualiza el avance                    # features/gestion_tareas.feature:28
+  Dado que la aplicación está desplegada y disponible                 # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                                     # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Y registro la tarea "Revisar el pipeline" con prioridad "MEDIA"     # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroLaTarea(java.lang.String,java.lang.String)
+  Y registro la tarea "Documentar el despliegue" con prioridad "BAJA" # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroLaTarea(java.lang.String,java.lang.String)
+  Y marco como completada la tarea "Revisar el pipeline"              # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.marcoComoCompletada(java.lang.String)
+  Entonces la tarea "Revisar el pipeline" figura como "Completada"    # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laTareaFiguraComo(java.lang.String,java.lang.String)
+  Y el avance mostrado es 50 por ciento                               # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elAvanceMostradoEs(int)
+
+@acceptance
+Escenario: Eliminar una tarea la quita del listado                  # features/gestion_tareas.feature:36
+  Dado que la aplicación está desplegada y disponible               # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                                   # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Y registro la tarea "Tarea descartable" con prioridad "BAJA"      # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroLaTarea(java.lang.String,java.lang.String)
+  Y elimino la tarea "Tarea descartable"                            # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.eliminoLaTarea(java.lang.String)
+  Entonces la tarea "Tarea descartable" ya no aparece en el listado # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laTareaYaNoAparece(java.lang.String)
+
+@acceptance
+Escenario: El sistema rechaza una tarea sin título      # features/gestion_tareas.feature:42
+  Dado que la aplicación está desplegada y disponible   # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                       # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Y registro la tarea "" con prioridad "MEDIA"          # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroLaTarea(java.lang.String,java.lang.String)
+  Entonces se muestra el mensaje de error "obligatorio" # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.seMuestraElMensajeDeError(java.lang.String)
+  Y el resumen indica 0 tareas totales                  # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elResumenIndicaTotales(int)
+
+@acceptance
+Escenario: El sistema rechaza un título duplicado        # features/gestion_tareas.feature:48
+  Dado que la aplicación está desplegada y disponible    # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                        # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Y registro la tarea "Tarea única" con prioridad "ALTA" # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroLaTarea(java.lang.String,java.lang.String)
+  Y registro la tarea "TAREA ÚNICA" con prioridad "BAJA" # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroLaTarea(java.lang.String,java.lang.String)
+  Entonces se muestra el mensaje de error "Ya existe"    # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.seMuestraElMensajeDeError(java.lang.String)
+  Y el resumen indica 1 tareas totales                   # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elResumenIndicaTotales(int)
+
+@acceptance
+Esquema del escenario: El avance se calcula según las tareas completadas # features/gestion_tareas.feature:63
+  Dado que la aplicación está desplegada y disponible                    # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                                        # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Y registro 4 tareas de ejemplo                                         # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroTareasDeEjemplo(int)
+  Y completo las primeras 1 tareas                                       # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.completoLasPrimeras(int)
+  Entonces el avance mostrado es 25 por ciento                           # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elAvanceMostradoEs(int)
+
+@acceptance
+Esquema del escenario: El avance se calcula según las tareas completadas # features/gestion_tareas.feature:64
+  Dado que la aplicación está desplegada y disponible                    # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                                        # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Y registro 4 tareas de ejemplo                                         # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroTareasDeEjemplo(int)
+  Y completo las primeras 2 tareas                                       # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.completoLasPrimeras(int)
+  Entonces el avance mostrado es 50 por ciento                           # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elAvanceMostradoEs(int)
+
+@acceptance
+Esquema del escenario: El avance se calcula según las tareas completadas # features/gestion_tareas.feature:65
+  Dado que la aplicación está desplegada y disponible                    # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.laAplicacionEstaDesplegada()
+  Cuando abro el gestor de tareas                                        # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.abroElGestor()
+  Y registro 3 tareas de ejemplo                                         # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.registroTareasDeEjemplo(int)
+  Y completo las primeras 3 tareas                                       # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.completoLasPrimeras(int)
+  Entonces el avance mostrado es 100 por ciento                          # cl.iplacex.automatizacion.gestortareas.aceptacion.pasos.PasosGestionTareas.elAvanceMostradoEs(int)
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.27 s -- in cl.iplacex.automatizacion.gestortareas.aceptacion.RunAcceptanceIT
+[INFO] Results:
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+[INFO] --- failsafe:3.5.3:verify (default) @ gestor-tareas ---
+[INFO] --- exec:3.5.0:exec (cerrar-acceptance-gate) @ gestor-tareas ---
+----------------------------------------------------------------
+ Acceptance Test Gate
+----------------------------------------------------------------
+  escenarios ejecutados : 9
+  fallidos              : 0
+  con error             : 0
+  omitidos              : 0
+----------------------------------------------------------------
+GATE APROBADO: los 9 escenarios cumplen los criterios de aceptación.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  19.966 s
+[INFO] Finished at: 2026-09-15T23:10:11-03:00
+[INFO] ------------------------------------------------------------------------
+
+================================================================
+ ETAPA 5 — Decisión
+================================================================
+  el gate aprobó: se promueve la versión 1.1.0
+Tráfico conmutado al slot: green (confirmado al intento 2)
+
+DESPLIEGUE COMPLETADO. El tráfico ahora va al slot green (versión 1.1.0).
+El slot blue queda en stand-by para un rollback instantáneo.
+
+=== ESTADO FINAL: el trafico se movio a la version nueva ===
+================================================================
+ Ambiente de prueba — estado actual
+================================================================
+  slot activo (recibe tráfico) : green
+
+  a través del balanceador :8090
+    {"fechaBuild":"2026-09-16T02:09:41Z","version":"1.1.0","slot":"green","commitSha":"d687609"}
+
+  slot blue directo        :8091
+    {"fechaBuild":"2026-09-16T02:08:45Z","commitSha":"59f1fd2","slot":"blue","version":"1.0.0"}
+
+  slot green directo       :8092
+    {"fechaBuild":"2026-09-16T02:09:41Z","version":"1.1.0","slot":"green","commitSha":"d687609"}
+================================================================

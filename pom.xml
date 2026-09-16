@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  Gestor de Tareas — Proyecto de Automatización de Pruebas
+  Examen Final · Automatización de Pruebas · Ingeniería en Informática
+
+  Este pom.xml es el entregable central de la ACTIVIDAD 1. Concentra:
+    · la administración de dependencias de pruebas (Unidad I)
+    · la separación de los niveles de prueba por plugin (Unidad II)
+    · los gates de calidad con umbral explícito (Unidad III)
+
+  Convención de nombres de prueba (define QUÉ plugin ejecuta QUÉ):
+    *Test.java  -> pruebas unitarias      -> maven-surefire-plugin (fase test)
+    *IT.java    -> pruebas de integración -> maven-failsafe-plugin (fase verify)
+    RunAcceptanceIT.java -> acceptance BDD -> solo con el perfil -Pacceptance,
+                            porque requiere un ambiente ya desplegado.
+  ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- Hereda de Spring Boot la gestión de versiones de todo su ecosistema. -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.0</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>cl.iplacex.automatizacion</groupId>
+  <artifactId>gestor-tareas</artifactId>
+  <version>1.0.0</version>
+  <name>Gestor de Tareas</name>
+  <description>Aplicación bajo prueba para el examen final de Automatización de Pruebas</description>
+
+  <properties>
+    <!-- Java 21 LTS: el equipo tiene JDK 25/26, pero se fija un target estable
+         y reproducible. Es el principio de línea base: fijar un entorno conocido y repetible. -->
+    <java.version>21</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Versiones explícitas: buena práctica de administración de dependencias.
+         Nunca depender de la versión que "resuelva sola" el gestor. -->
+    <selenium.version>4.27.0</selenium.version>
+    <cucumber.version>7.20.1</cucumber.version>
+    <rest-assured.version>5.5.0</rest-assured.version>
+    <jacoco.version>0.8.12</jacoco.version>
+    <spotbugs.version>4.8.6.6</spotbugs.version>
+
+    <!-- Umbral del gate de cobertura (criterio habitual: >= 80%). -->
+    <jacoco.cobertura.minima>0.80</jacoco.cobertura.minima>
+
+    <!-- URL contra la que corren los acceptance tests. En local apunta al
+         balanceador del ambiente de prueba; el pipeline la sobrescribe. -->
+    <acceptance.url>http://localhost:8090</acceptance.url>
+  </properties>
+
+  <dependencies>
+
+    <!-- ===================== APLICACIÓN BAJO PRUEBA ===================== -->
+
+    <!-- API REST + servidor embebido. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- Interfaz web server-side. Sin UI no habría nada que automatizar con
+         Selenium, que es una exigencia explícita del enunciado. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+
+    <!-- Validación declarativa: genera reglas de negocio verificables por
+         pruebas unitarias sin necesidad de levantar el contexto. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <!-- Persistencia. Habilita pruebas de integración reales del tipo
+         "API + base de datos". -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+    <!-- Base de datos en memoria. Es el mecanismo de aislamiento que
+         mantiene idempotentes las suites de prueba. -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Endpoints de health check, consumidos por el despliegue Blue-Green
+         para decidir si el slot nuevo está sano antes de conmutar tráfico. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <!-- ===================== DEPENDENCIAS DE PRUEBA ===================== -->
+
+    <!-- Trae JUnit 5 (Jupiter), Mockito, AssertJ y el soporte de test de Spring.
+         Cubre las herramientas de prueba unitaria del programa. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Selenium WebDriver: automatización de la interfaz para los acceptance
+         tests. Exigido explícitamente por el enunciado del examen. -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>${selenium.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Cucumber: escenarios BDD en Gherkin. Son el contenido del
+         Acceptance Test Gate. -->
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <version>${cucumber.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-junit-platform-engine</artifactId>
+      <version>${cucumber.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-suite</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- RestAssured: verificación de contratos de la API REST en las
+         pruebas de integración. -->
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>${rest-assured.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <!-- Empaqueta el .jar ejecutable que se despliega en los slots
+           blue y green. Es el artefacto versionado al que se
+           puede volver si un despliegue falla. -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <!-- ===============================================================
+           NIVEL 1 — PRUEBAS UNITARIAS (fase `test`)
+           Rápidas y aisladas. Son las que corren en la etapa de commit
+           del deployment pipeline.
+           =============================================================== -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <!-- Blindaje: aunque un IT quedara mal ubicado, Surefire no lo corre. -->
+          <excludes>
+            <exclude>**/*IT.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <!-- ===============================================================
+           NIVEL 2 — PRUEBAS DE INTEGRACIÓN (fase `verify`)
+           Levantan el contexto de Spring y la base H2. Verifican la
+           interacción real entre controlador, servicio y repositorio.
+           =============================================================== -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*IT.java</include>
+          </includes>
+          <!-- Los acceptance tests NO corren aquí: necesitan un ambiente
+               desplegado. Se habilitan con el perfil `acceptance`. -->
+          <excludes>
+            <exclude>**/RunAcceptanceIT.java</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- ===============================================================
+           GATE DE COBERTURA
+           Criterio de avance del pipeline: cobertura mínima exigida del 80 %.
+           El build FALLA si no se alcanza el umbral.
+           =============================================================== -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <executions>
+          <execution>
+            <id>preparar-agente</id>
+            <goals><goal>prepare-agent</goal></goals>
+          </execution>
+          <execution>
+            <id>reporte-cobertura</id>
+            <phase>test</phase>
+            <goals><goal>report</goal></goals>
+          </execution>
+          <execution>
+            <id>gate-cobertura</id>
+            <phase>test</phase>
+            <goals><goal>check</goal></goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>${jacoco.cobertura.minima}</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+              <excludes>
+                <!-- La clase de arranque no aporta lógica verificable. -->
+                <exclude>**/GestorTareasApplication.class</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- ===============================================================
+           ANÁLISIS ESTÁTICO (SAST)
+           Se ubica entre Build y Unit Tests. SpotBugs es el
+           equivalente local y offline de SonarQube/Snyk, que en un entorno
+           corporativo ocuparían este mismo lugar del pipeline.
+           =============================================================== -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>${spotbugs.version}</version>
+        <configuration>
+          <effort>Max</effort>
+          <threshold>Medium</threshold>
+          <!-- Criterio de bloqueo: cualquier hallazgo detiene el pipeline. -->
+          <failOnError>true</failOnError>
+          <xmlOutput>true</xmlOutput>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <profiles>
+    <!-- ==================================================================
+         PERFIL `acceptance` — ACCEPTANCE TEST GATE
+         Se activa SOLO después de desplegar en el ambiente de prueba.
+         Corre los escenarios BDD en Gherkin contra la aplicación viva.
+         Uso: ./mvnw verify -Pacceptance -Dacceptance.url=http://localhost:8091
+         ================================================================== -->
+    <profile>
+      <id>acceptance</id>
+      <build>
+        <plugins>
+          <!--
+            Las unitarias ya se ejecutaron en la etapa de commit; repetirlas
+            aquí solo alargaría el gate sin aportar información nueva.
+          -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration><skipTests>true</skipTests></configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <!-- Se invierte la selección: aquí SOLO corre el runner BDD. -->
+              <includes>
+                <include>**/RunAcceptanceIT.java</include>
+              </includes>
+              <excludes combine.self="override"/>
+              <systemPropertyVariables>
+                <acceptance.url>${acceptance.url}</acceptance.url>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+          <!-- La cobertura no aplica a un gate de aceptación de caja negra. -->
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <configuration><skip>true</skip></configuration>
+          </plugin>
+
+          <!--
+            Cierre del gate.
+
+            El motor de suite de JUnit Platform no propaga los resultados de
+            los escenarios de Cucumber al reporte agregado de Failsafe, que
+            los informa como "Tests run: 0" y dejaría pasar el build aun con
+            escenarios fallidos. Por eso la decisión de aprobar o rechazar se
+            toma sobre el reporte que Cucumber sí publica correctamente.
+          -->
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.5.0</version>
+            <executions>
+              <execution>
+                <id>cerrar-acceptance-gate</id>
+                <phase>verify</phase>
+                <goals><goal>exec</goal></goals>
+                <configuration>
+                  <executable>${project.basedir}/scripts/verificar-aceptacion.sh</executable>
+                  <arguments>
+                    <argument>${project.build.directory}/cucumber-reports/acceptance.xml</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
