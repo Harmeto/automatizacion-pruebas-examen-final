@@ -5,9 +5,9 @@
   Examen Final · Automatización de Pruebas · Ingeniería en Informática
 
   Este pom.xml es el entregable central de la ACTIVIDAD 1. Concentra:
-    · la administración de dependencias de pruebas (Unidad I, ME_1-3 §2)
-    · la separación de los niveles de prueba por plugin (Unidad II, ME_3-3 §3.1)
-    · los gates de calidad con umbral explícito (Unidad III, ME_5-3 §1.2.2)
+    · la administración de dependencias de pruebas (Unidad I)
+    · la separación de los niveles de prueba por plugin (Unidad II)
+    · los gates de calidad con umbral explícito (Unidad III)
 
   Convención de nombres de prueba (define QUÉ plugin ejecuta QUÉ):
     *Test.java  -> pruebas unitarias      -> maven-surefire-plugin (fase test)
@@ -37,11 +37,11 @@
 
   <properties>
     <!-- Java 21 LTS: el equipo tiene JDK 25/26, pero se fija un target estable
-         y reproducible. Es el principio de "línea base" de la Unidad I (ME_2-3 §1.1). -->
+         y reproducible. Es el principio de línea base: fijar un entorno conocido y repetible. -->
     <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <!-- Versiones explícitas: buena práctica exigida en ME_1-3 §2.6.
+    <!-- Versiones explícitas: buena práctica de administración de dependencias.
          Nunca depender de la versión que "resuelva sola" el gestor. -->
     <selenium.version>4.27.0</selenium.version>
     <cucumber.version>7.20.1</cucumber.version>
@@ -49,7 +49,7 @@
     <jacoco.version>0.8.12</jacoco.version>
     <spotbugs.version>4.8.6.6</spotbugs.version>
 
-    <!-- Umbral del gate de cobertura (ME_5-3 §1.3.2 sugiere >= 80%). -->
+    <!-- Umbral del gate de cobertura (criterio habitual: >= 80%). -->
     <jacoco.cobertura.minima>0.80</jacoco.cobertura.minima>
 
     <!-- URL contra la que corren los acceptance tests. En local apunta al
@@ -82,14 +82,14 @@
     </dependency>
 
     <!-- Persistencia. Habilita pruebas de integración reales del tipo
-         "API + base de datos" descrito en ME_4-3 §3.1. -->
+         "API + base de datos". -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
 
-    <!-- Base de datos en memoria. ME_3-3 §3.2 la nombra como mecanismo de
-         aislamiento e idempotencia de las suites de prueba. -->
+    <!-- Base de datos en memoria. Es el mecanismo de aislamiento que
+         mantiene idempotentes las suites de prueba. -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
@@ -106,7 +106,7 @@
     <!-- ===================== DEPENDENCIAS DE PRUEBA ===================== -->
 
     <!-- Trae JUnit 5 (Jupiter), Mockito, AssertJ y el soporte de test de Spring.
-         Cubre las herramientas de prueba unitaria nombradas en ME_1-3 §2.1. -->
+         Cubre las herramientas de prueba unitaria del programa. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -122,8 +122,8 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Cucumber: escenarios BDD en Gherkin. ME_4-3 §1 y ME_5-3 §1.4 los
-         sitúan como el contenido del Acceptance Test Gate. -->
+    <!-- Cucumber: escenarios BDD en Gherkin. Son el contenido del
+         Acceptance Test Gate. -->
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-java</artifactId>
@@ -157,7 +157,8 @@
     <plugins>
 
       <!-- Empaqueta el .jar ejecutable que se despliega en los slots
-           blue y green. Es el "artefacto versionado" de ME_6-3 §2. -->
+           blue y green. Es el artefacto versionado al que se
+           puede volver si un despliegue falla. -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -174,7 +175,7 @@
       <!-- ===============================================================
            NIVEL 1 — PRUEBAS UNITARIAS (fase `test`)
            Rápidas y aisladas. Son las que corren en la etapa de commit
-           del deployment pipeline (ME_5-3 §1.3.2).
+           del deployment pipeline.
            =============================================================== -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -220,8 +221,8 @@
 
       <!-- ===============================================================
            GATE DE COBERTURA
-           ME_5-3 §1.3.2: "Cobertura mínima exigida (p.ej., >= 80 %) para
-           avanzar". El build FALLA si no se alcanza el umbral.
+           Criterio de avance del pipeline: cobertura mínima exigida del 80 %.
+           El build FALLA si no se alcanza el umbral.
            =============================================================== -->
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -265,7 +266,7 @@
 
       <!-- ===============================================================
            ANÁLISIS ESTÁTICO (SAST)
-           ME_5-3 §1.3.2 lo ubica entre Build y Unit Tests. SpotBugs es el
+           Se ubica entre Build y Unit Tests. SpotBugs es el
            equivalente local y offline de SonarQube/Snyk, que en un entorno
            corporativo ocuparían este mismo lugar del pipeline.
            =============================================================== -->
@@ -287,7 +288,7 @@
 
   <profiles>
     <!-- ==================================================================
-         PERFIL `acceptance` — ACCEPTANCE TEST GATE (ME_5-3 §1.4)
+         PERFIL `acceptance` — ACCEPTANCE TEST GATE
          Se activa SOLO después de desplegar en el ambiente de prueba.
          Corre los escenarios BDD en Gherkin contra la aplicación viva.
          Uso: ./mvnw verify -Pacceptance -Dacceptance.url=http://localhost:8091
@@ -316,6 +317,34 @@
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>${jacoco.version}</version>
             <configuration><skip>true</skip></configuration>
+          </plugin>
+
+          <!--
+            Cierre del gate.
+
+            El motor de suite de JUnit Platform no propaga los resultados de
+            los escenarios de Cucumber al reporte agregado de Failsafe, que
+            los informa como "Tests run: 0" y dejaría pasar el build aun con
+            escenarios fallidos. Por eso la decisión de aprobar o rechazar se
+            toma sobre el reporte que Cucumber sí publica correctamente.
+          -->
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.5.0</version>
+            <executions>
+              <execution>
+                <id>cerrar-acceptance-gate</id>
+                <phase>verify</phase>
+                <goals><goal>exec</goal></goals>
+                <configuration>
+                  <executable>${project.basedir}/scripts/verificar-aceptacion.sh</executable>
+                  <arguments>
+                    <argument>${project.build.directory}/cucumber-reports/acceptance.xml</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
