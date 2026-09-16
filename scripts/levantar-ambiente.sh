@@ -13,7 +13,7 @@ VERSION="${1:-1.0.0}"
 export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home}"
 
 echo "Construyendo la versión base ${VERSION}..."
-./mvnw -B -q package -DskipTests
+./mvnw -B -q package -DskipTests -Djacoco.skip=true
 JAR="$(ls target/gestor-tareas-*.jar | head -1)"
 
 docker build -q \

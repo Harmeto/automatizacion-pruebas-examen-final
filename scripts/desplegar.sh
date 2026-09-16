@@ -54,7 +54,10 @@ etapa 1 "Empaquetado y construcción de la imagen"
 COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo sin-commit)"
 MOMENTO="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-./mvnw -B -q package -DskipTests
+# El gate de cobertura pertenece a la etapa de commit, no al empaquetado
+# del despliegue: aqui no se ejecutan pruebas, de modo que evaluarlo solo
+# leeria datos de cobertura de una corrida anterior.
+./mvnw -B -q package -DskipTests -Djacoco.skip=true
 JAR="$(ls target/gestor-tareas-*.jar | head -1)"
 echo "  artefacto: ${JAR}"
 
